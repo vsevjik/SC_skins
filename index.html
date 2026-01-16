@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Catler Ecosystem | Анонимность и Инструменты</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --header-bg: rgba(15, 23, 42, 0.9);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8f9fa;
+            --text-dim: #94a3b8;
+            --primary: #4361ee;
+            --accent: #4cc9f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg: #f1f5f9;
+            --header-bg: rgba(255, 255, 255, 0.9);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --primary: #3b82f6;
+            --accent: #0ea5e9;
+            --border: rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        header {
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 1000;
+            padding: 15px 0; border-bottom: 1px solid var(--border);
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 800; font-size: 1.5rem; }
+        .logo i { color: var(--accent); }
+
+        .ip-header-badge {
+            font-size: 0.75rem;
+            background: var(--border);
+            padding: 8px 15px;
+            border-radius: 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .ip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+        .nav-controls { display: flex; gap: 12px; align-items: center; }
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 44px; height: 44px; border-radius: 12px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        .hero { padding: 80px 0 50px; text-align: center; }
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 20px; background: linear-gradient(90deg, var(--text-main), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-dim); max-width: 800px; margin: 0 auto 40px; font-size: 1.2rem; }
+
+        .main-nav {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; margin-bottom: 60px;
+        }
+        .nav-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            padding: 50px 30px; border-radius: 30px; cursor: pointer;
+            text-align: center; box-shadow: var(--shadow);
+        }
+        .nav-card:hover { transform: translateY(-10px); border-color: var(--primary); background: rgba(67, 97, 238, 0.05); }
+        .nav-card i { font-size: 3.5rem; color: var(--primary); margin-bottom: 25px; display: block; }
+
+        .section { display: none; padding: 50px 0; animation: fadeInUp 0.5s ease forwards; }
+        .section.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-left: 6px solid var(--primary); padding-left: 20px; }
+        .section-title h2 { font-size: 2rem; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 30px; }
+        .card {
+            background: var(--card-bg); border-radius: 28px; padding: 35px;
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .card h3 { font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .card p { font-size: 1rem; color: var(--text-dim); margin-bottom: 25px; flex-grow: 1; line-height: 1.6; }
+
+        .badge { font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 30px; text-transform: uppercase; margin-bottom: 20px; display: inline-block; align-self: flex-start; }
+        .badge-live { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-new { background: rgba(76, 201, 240, 0.15); color: var(--accent); }
+        .badge-warning { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .badge-dev { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+        .tool-display {
+            background: rgba(0,0,0,0.3);
+            padding: 20px; border-radius: 20px;
+            margin-bottom: 25px; border: 1px solid var(--border);
+        }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; }
+        .info-val { font-family: monospace; color: var(--accent); font-weight: 700; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 16px 30px; border-radius: 18px; font-weight: 700;
+            text-decoration: none; cursor: pointer; border: none; font-size: 16px; gap: 12px;
+            transition: 0.3s;
+        }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); }
+        .btn-secondary { background: var(--border); color: var(--text-main); }
+        .btn-warning { background: var(--danger); color: #fff; }
+        .btn-full { width: 100%; }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        footer { text-align: center; padding: 80px 0; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 60px; }
+        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 18px 40px; border-radius: 50px; display: none; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; }
+
+        .author-badge {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 2.2rem; } }
+    </style>
+</head>
+<body data-theme="dark">
+
+<header>
+    <div class="container header-content">
+        <div class="logo" onclick="goHome()"><i class="fas fa-cat"></i> <span>Catler</span></div>
+        <div class="nav-controls">
+            <div class="ip-header-badge"><div class="ip-dot"></div><span id="h-ip">Определяем...</span></div>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <main id="home" class="section active">
+        <div class="hero">
+            <h1>Catler Ecosystem</h1>
+            <p>Ваша точка доступа к свободному интернету 🌐 Проверяйте доступность узлов, генерируйте защиту и используйте лучшие VPN-конфигурации в одной экосистеме.</p>
+        </div>
+        <div class="main-nav">
+            <div class="nav-card" onclick="showSection('vpn')"><i class="fas fa-shield-halved"></i><h3>VPN Доступ</h3><p>Подписки и ссылки</p></div>
+            <div class="nav-card" onclick="showSection('apps')"><i class="fas fa-rocket"></i><h3>Проекты</h3><p>Наши разработки</p></div>
+            <div class="nav-card" onclick="showSection('social')"><i class="fas fa-comments"></i><h3>Связь</h3><p>Форум и новости</p></div>
+        </div>
+    </main>
+
+    <section id="vpn" class="section">
+        <div class="section-title"><h2>VPN Конфигурации</h2><button class="btn btn-secondary" onclick="goHome()">Назад</button></div>
+        <div class="grid">
+            <div class="card">
+                <span class="badge badge-live">Стабильно</span>
+                <h3>⚪ catWhiteVPN</h3>
+                <p>Основная флагманская подписка, обеспечивающая стабильный доступ к сети без ограничений. ⚡ Оптимизированные протоколы для минимальной задержки и высокой скорости загрузки. Идеально для работы и стриминга.</p>
+                <button class="btn btn-primary btn-full" onclick="copy('https://raw.githubusercontent.com/twinkalex1470-crypto/CatWhiteVPN/refs/heads/main/CaTWhiteVPN.txt')">Копировать подписку</button>
+            </div>
+            <div class="card">
+                <span class="badge badge-new">Обновлено</span>
+                <h3>🟠 OBS (vsevjik)</h3>
+                <p>Специализированная база конфигураций для приложения HAPP. 🛠 Регулярно обновляется свежими узлами для обхода самых сложных блокировок. Лучший выбор для альтернативных маршрутов.</p>
+                <button class="btn btn-primary btn-full" onclick="copy('https://raw.githubusercontent.com/vsevjik/OBSpiskov/refs/heads/main/chwh')">Копировать подписку</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="apps" class="section">
+        <div class="section-title"><h2>Наши разработки</h2><button class="btn btn-secondary" onclick="goHome()">Назад</button></div>
+        <div class="grid">
+            <div class="card">
+                <span class="badge badge-new">Standalone</span>
+                <h3>🔍 Proxy Filter</h3>
+                <p>Профессиональный инструмент для массовой проверки IP. 🧹 Отсеивайте нерабочие узлы, замеряйте реальный пинг и экспортируйте только «живые» конфигурации в один клик. Максимальная эффективность.</p>
+                <a href="filter.html" class="btn btn-primary btn-full">Запустить Filter</a>
+            </div>
+
+            <div class="card">
+                <span class="badge badge-live">Pro Tool</span>
+                <h3>💎 VCC Hub Pro</h3>
+                <p>Продвинутый редактор и агрегатор VPN-ссылок. 📁 Автоматически удаляет дубликаты, проверяет корректность форматов и объединяет несколько списков в один поток. Порядок в ваших подписках.</p>
+                <a href="VCC.html" class="btn btn-primary btn-full">Открыть редактор</a>
+            </div>
+
+            <!-- НОВЫЙ ПРОЕКТ: UWB -->
+            <div class="card">
+                <span class="badge badge-warning">Важно!</span>
+                <h3>⚡ UWB — Ultimate Whitelist Bypass</h3>
+                <p>Сайт для поиска рабочих V2ray конфигов, которые работают во время "Белых списков" и отключения интернета при угрозах БПЛА в России.</p>
+                
+                <div class="tool-display" style="margin-bottom: 15px;">
+                    <div class="info-row"><span>Статус:</span> <span class="info-val" style="color:var(--success)">АКТИВЕН</span></div>
+                    <div class="info-row"><span>Конфиги:</span> <span class="info-val">V2Ray / XRay</span></div>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 12px; margin-bottom: 20px; border-left: 3px solid var(--danger);">
+                    <strong>⚠️ ВНИМАНИЕ:</strong> Не используйте эти конфиги при работе с сервисами, доступными без VPN (ВК, Яндекс, Max), чтобы избежать массовых блокировок!
+                </div>
+
+                <div class="author-badge">
+                    <i class="fas fa-user"></i> Автор: @VRRYZzz
+                </div>
+
+                <a href="https://ryzgames31.github.io/UWB/" target="_blank" class="btn btn-warning btn-full" style="margin-top: 15px;">
+                    <i class="fas fa-external-link-alt"></i> Перейти к UWB
+                </a>
+            </div>
+
+            <!-- НОВЫЙ ПРОЕКТ: catCraftLauncher -->
+            <div class="card">
+                <span class="badge badge-dev">В разработке</span>
+                <h3>⛏ catCraftLauncher</h3>
+                <p>Официальный лаунчер Minecraft от Catler Team. 🎮 Удобный интерфейс, автоматические обновления, встроенные моды и оптимизация для комфортной игры.</p>
+                
+                <div class="tool-display" style="margin-bottom: 20px;">
+                    <div class="info-row"><span>Статус:</span> <span class="info-val" style="color:#f59e0b">РАЗРАБОТКА</span></div>
+                    <div class="info-row"><span>Версия:</span> <span class="info-val">Alpha 0.1</span></div>
+                    <div class="info-row"><span>Платформа:</span> <span class="info-val">Windows / Linux</span></div>
+                </div>
+
+                <div class="author-badge">
+                    <i class="fas fa-user"></i> Разработчик: @ahsas1022
+                </div>
+
+                <button class="btn btn-secondary btn-full" onclick="showComingSoon()" style="margin-top: 15px;">
+                    <i class="fas fa-tools"></i> Скоро будет доступно
+                </button>
+            </div>
+
+            <div class="card">
+                <span class="badge badge-new">Network</span>
+                <h3>📡 Whitelist Checker</h3>
+                <p>Интеллектуальный сканер прозрачности сети. 🚥 Проверяет доступность критических портов и API сервисов Cloudflare в реальном времени. Помогает понять, блокирует ли провайдер ваши узлы.</p>
+                <div class="tool-display">
+                    <div class="info-row"><span>Cloudflare API:</span> <span class="info-val" id="wl-res">Тест...</span></div>
+                    <div class="info-row"><span>HTTPS Port:</span> <span class="info-val" style="color:var(--success)">OPEN</span></div>
+                </div>
+                <button class="btn btn-secondary btn-full" onclick="checkWL()">Начать проверку</button>
+            </div>
+
+            <div class="card">
+                <span class="badge badge-live">Security</span>
+                <h3>🛡 Security Center</h3>
+                <p>Ваша цифровая защита. 🆔 Определяет текущий IP для проверки анонимности и генерирует криптостойкие 16-значные пароли прямо в браузере. Безопасность превыше всего.</p>
+                <div class="tool-display">
+                    <div class="info-row"><span>Ваш IP:</span> <span class="info-val" id="c-ip">...</span></div>
+                    <div id="p-res" style="font-family:monospace; font-weight:800; color:var(--success); text-align:center; margin-top:10px; cursor:pointer;" onclick="copy(this.innerText)">Генерировать пароль</div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="genP()">Сгенерировать</button>
+            </div>
+
+            <div class="card">
+                <span class="badge badge-new">Creative</span>
+                <h3>🎭 Nickname Gen</h3>
+                <p>Инструмент для создания уникальных игровых имен. 🎮 Позволяет выделиться в любом сообществе с помощью стильных комбинаций, спецсимволов и кастомизированных никнеймов.</p>
+                <a href="nick-generator.html" class="btn btn-secondary btn-full">Создать ник</a>
+            </div>
+
+            <div class="card">
+                <h3>🚀 Speed Test</h3>
+                <p>Быстрый замер скорости вашего текущего соединения. Проверьте эффективность работы вашего VPN прокси прямо сейчас.</p>
+                <a href="speed-test.html" class="btn btn-secondary btn-full">Запустить тест</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="social" class="section">
+        <div class="section-title"><h2>Связь и Сообщество</h2><button class="btn btn-secondary" onclick="goHome()">Назад</button></div>
+        <div class="grid">
+            <div class="card"><h3>📢 Catler News</h3><p>Все новости экосистемы и обновления VPN в одном канале. Будьте первыми, кто узнает об изменениях.</p><a href="https://t.me/catlergememe" target="_blank" class="btn btn-primary btn-full">Telegram Канал</a></div>
+            <div class="card"><h3>👥 Catler Forum</h3><p>Обсуждение конфигов, гайды и взаимопомощь участников. Наше дружное сообщество всегда поможет.</p><a href="https://t.me/communitycatler" target="_blank" class="btn btn-primary btn-full">Открыть Форум</a></div>
+            <div class="card"><h3>💬 Поддержка</h3><p>Связь с администрацией по вопросам работы сервисов. Мы ответим на любые технические вопросы.</p><a href="https://t.me/catlerok12" target="_blank" class="btn btn-secondary btn-full">Написать в чат</a></div>
+        </div>
+    </section>
+
+    <footer><p>© 2026 Catler Team | Сделано для свободного интернета 🌐</p></footer>
+</div>
+
+<div id="toast" class="toast">✅ Скопировано в буфер!</div>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function goHome() { showSection('home'); }
+
+    function toggleTheme() {
+        const b = document.body;
+        const isD = b.getAttribute('data-theme') === 'dark';
+        b.setAttribute('data-theme', isD ? 'light' : 'dark');
+        document.getElementById('themeBtn').innerHTML = isD ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
+
+    function copy(text) {
+        if(text.includes("Генерировать")) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        });
+    }
+
+    async function getNet() {
+        try {
+            const r = await fetch('https://ipapi.co/json/');
+            const d = await r.json();
+            document.getElementById('h-ip').innerText = d.ip;
+            document.getElementById('c-ip').innerText = d.ip;
+        } catch { document.getElementById('h-ip').innerText = "Offline"; }
+    }
+
+    function genP() {
+        const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()";
+        let p = "";
+        for(let i=0; i<16; i++) p += c.charAt(Math.floor(Math.random() * c.length));
+        document.getElementById('p-res').innerText = p;
+    }
+
+    async function checkWL() {
+        const res = document.getElementById('wl-res');
+        res.innerText = "ПРОВЕРКА...";
+        try {
+            const s = Date.now();
+            await fetch('https://1.1.1.1', { mode: 'no-cors', cache: 'no-cache' });
+            res.innerText = (Date.now() - s) + "ms";
+            res.style.color = "var(--success)";
+        } catch {
+            res.innerText = "BLOCK";
+            res.style.color = "var(--danger)";
+        }
+    }
+
+    function showComingSoon() {
+        const t = document.getElementById('toast');
+        t.innerText = "🚧 catCraftLauncher скоро будет доступен!";
+        t.style.background = "#f59e0b";
+        t.style.display = 'block';
+        setTimeout(() => {
+            t.style.display = 'none';
+            t.style.background = "";
+            t.innerText = "✅ Скопировано в буфер!";
+        }, 3000);
+    }
+
+    getNet();
+    checkWL();
+</script>
+</body>
+</html>
